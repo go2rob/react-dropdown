@@ -48,6 +48,7 @@ class MainInterface extends Component {
           <Info text="Regular Dropdown"/>
           <Dropdown
             data={this.dropdownItems}
+            disabledItems={[5]} // hardcoded
             selected={selectedItem.regular}
             onSelect={this.handleSelectRegular}
           />
@@ -56,6 +57,9 @@ class MainInterface extends Component {
           <Info text="Grouped Dropdown"/>
           <Dropdown
             data={this.dropdownGroups}
+            disabledItems={{
+              "Group 2": [2]
+            }}  // hardcoded
             selected={selectedItem.grouped}
             onSelect={this.handleSelectGrouped}
           />

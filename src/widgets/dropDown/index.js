@@ -67,6 +67,7 @@ class Dropdown extends Component {
           onClick={this.handleClick}
         >
           <span>{this.getSelectedValue()}</span>
+          <Chevron isExpanded={this.state.isExpanded}/>
         </div>
         <DropDownContainer
           { ...this.props }
@@ -88,7 +89,12 @@ Dropdown.propTypes = {
   data: PropTypes.oneOfType([
     PropTypes.array,
     PropTypes.object
-  ]).isRequired
+  ]).isRequired,
+  onSelect: PropTypes.func.isRequired,
+  disabledItems: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object
+  ])
 }
 
 const DropDownContainer = props => {
@@ -128,26 +134,58 @@ const DropDownContainer = props => {
   );
 }
 
-const DropdownItems = ({ group, items, focusedIndex, focusedGroup, handleMouseEnter, handleMouseLeave, handleItemSelect }) => {
+const DropdownItems = ({
+  group,
+  items,
+  focusedIndex,
+  focusedGroup,
+  handleMouseEnter,
+  handleMouseLeave,
+  handleItemSelect,
+  disabledItems
+}) => {
+  const orderedItems = _.sortBy(items)
   return (
-    _.map(items, (item, index) => {
+    _.map(orderedItems, (item, index) => {
       const isItemFocused = focusedIndex===index
       const isGroupFocused = focusedGroup===group
       const isFocused = group ? ( isGroupFocused && isItemFocused) : isItemFocused
+      const isDisabled = disabledItems &&
+        group
+          ? _.includes(_.keys(disabledItems), group) && _.includes(disabledItems[group], index)
+          : _.includes(disabledItems, index)
 
-      return (
-        <div
-          key={index}
-          className={ isFocused ? "dropdown-item-focused" :"dropdown-item"}
-          onMouseEnter={() => handleMouseEnter({ index })}
-          onMouseLeave={handleMouseLeave}
-          onClick={handleItemSelect}
-        >
-          <span>
-            {item}
-          </span>
-        </div>
-      );
+      const className = isDisabled
+        ? "dropdown-item disabled"
+        : isFocused
+          ? "dropdown-item focused"
+          : "dropdown-item"
+
+      return isDisabled
+        ? (
+            <div key={index} className={ className }>
+              <span>{item}</span>
+            </div>
+          )
+        : (
+            <div
+              key={index}
+              className={ className }
+              onMouseEnter={() => handleMouseEnter({ index })}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleItemSelect}
+            >
+              <span>
+                {item}
+              </span>
+            </div>
+          );
     })
   );
+}
+
+const Chevron = ({ isExpanded }) => {
+  return isExpanded
+    ? <span className="fa fa-chevron-up chevron"></span>
+    : <span className="fa fa-chevron-down chevron"></span>
 }

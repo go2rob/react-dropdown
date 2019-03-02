@@ -5,6 +5,7 @@
 
 .dropdown-display {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   border: 1px solid;
   padding: 2%;
@@ -32,12 +33,13 @@
   cursor: default;
 }
 
-.dropdown-item-focused {
-  display: flex;
-  padding: 2%;
-  padding-left: 5%;
-  cursor: default;
+.focused {
   background-color: #d7d9dd;
+}
+
+.disabled {
+  cursor: not-allowed;
+  color: #bdbdbd
 }
 
 .dropdown-group-title {
@@ -47,4 +49,9 @@
   padding-left: 5%;
   cursor: default;
   font-weight: bold;
+}
+
+.chevron {
+  font-size: 12px;
+  margin-right: 5px;
 }
