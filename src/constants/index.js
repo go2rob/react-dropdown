@@ -1,12 +1,16 @@
+import _ from "lodash";
+
+const mockArray = () => _.times(8, index => `Item ${ index + 1 }`);
+
+const mockGroups = () => {
+  const groups = _.times(4, index => `Group ${ index + 1 }`);
+  return _.reduce(groups, (obj, group, index) => ({
+    ...obj,
+    [group]: _.times(_.random(2,4), ind => `${group} Item ${ ind + 1 }`)
+  }), {});
+}
+
 export const mockedData = {
-  array: [
-    "Item 1",
-    "Item 2",
-    "Item 3",
-    "Item 4",
-    "Item 5",
-    "Item 6",
-    "Item 7",
-    "Item 8",
-  ]
+  array: mockArray(),
+  groups: mockGroups()
 }
