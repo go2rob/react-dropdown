@@ -1,0 +1,15 @@
+.dropdown-main {
+  flex: 1;
+}
+
+.dropdown-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid;
+  padding: 1.5%;
+  margin: 5%;
+  border-radius: 4px;
+  background-color: #f9fbff;
+  font-size: 20px;
+}
