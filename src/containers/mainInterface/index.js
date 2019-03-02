@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import Dropdown from "../../widgets/dropDown"
-import { mockedData } from "../../constants"
+import _ from "lodash";
+
+import Dropdown from "../../widgets/dropDown";
+import { mockedData } from "../../constants";
 import './mainInterface.css';
 
 
@@ -8,34 +10,56 @@ class MainInterface extends Component {
   constructor(props) {
     super(props)
     this.dropdownItems = mockedData.array
+    this.dropdownGroups = mockedData.groups
+
+    const selectedItemRegular =  this.dropdownItems[0]
+    const selectedItemGrouped = _(this.dropdownGroups).values().flatten().first()
     this.state = {
-      selectedItem: this.dropdownItems[0]
+      selectedItem: {
+        regular: selectedItemRegular,
+        grouped: selectedItemGrouped
+      } 
     }
   }
 
-  handleSelect = (item, index) => {
-    console.log(item, index);
-    
-    this.setState(_prevState => ({
-      selectedItem: item
+  handleSelectRegular = (item, _index) => {
+    this.setState(prevState => ({
+      selectedItem: {
+        ...prevState.selectedItem,
+        regular: item
+      }
+    }))
+  }
+
+  handleSelectGrouped = (item, _index, _group) => {
+    this.setState(prevState => ({
+      selectedItem: {
+        ...prevState.selectedItem,
+        grouped: item
+      }
     }))
   }
 
   render() {
+    const { selectedItem } = this.state
     return (
       <div className="main-container">
         <div className="sub-container">
           <Info text="Regular Dropdown"/>
           <Dropdown
             data={this.dropdownItems}
-            selected={this.state.selectedItem}
-            onSelect={this.handleSelect}
+            selected={selectedItem.regular}
+            onSelect={this.handleSelectRegular}
           />
         </div>
-        {/* <div className="sub-container">
+        <div className="sub-container">
           <Info text="Grouped Dropdown"/>
-          <Dropdown/>
-        </div> */}
+          <Dropdown
+            data={this.dropdownGroups}
+            selected={selectedItem.grouped}
+            onSelect={this.handleSelectGrouped}
+          />
+        </div>
       </div>
     );
   }

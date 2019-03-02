@@ -9,7 +9,8 @@ class Dropdown extends Component {
     this.state = {
       selectedValue: this.getSelectedValue(),
       isExpanded: false,
-      focusedIndex: -1
+      focusedIndex: -1,
+      focusedGroup: ""
       // TODO: change to false
     }
   }
@@ -25,25 +26,37 @@ class Dropdown extends Component {
     }))
   }
 
-  handleMouseEnter = index => {
-    this.setState(prevState => ({
-      ...prevState,
-      focusedIndex: index
-    }))
+  handleMouseEnter = params => {
+    const { index, group } = params
+    this.setState(prevState => {
+      const focusedIndex =  params.hasOwnProperty("index") ? index : prevState.focusedIndex
+      const focusedGroup =  params.hasOwnProperty("group") ? group : prevState.focusedGroup
+      return {
+        ...prevState,
+        focusedIndex,
+        focusedGroup
+      }
+    })
   }
 
-  handleMouseLeave = () => {
-    this.setState(prevState => ({
-      ...prevState,
-      focusedIndex: -1
-    }))
+  handleMouseLeave = ({ group }) => {
+    this.setState(prevState => {
+      const focusedGroup = group ? "" : prevState.focusedGroup
+      return {
+        ...prevState,
+        focusedIndex: -1,
+        focusedGroup
+      }
+    })
   }
 
   handleItemSelect = () => {
-    const { focusedIndex } = this.state
-    const item = this.props.data[focusedIndex]
+    const { focusedIndex, focusedGroup } = this.state
+    const item = focusedGroup===""
+      ? this.props.data[focusedIndex]
+      : this.props.data[focusedGroup][focusedIndex]    
     this.handleClick()
-    this.props.onSelect(item, focusedIndex)
+    this.props.onSelect(item, focusedIndex, focusedGroup)
   }
 
   render() {
@@ -61,6 +74,7 @@ class Dropdown extends Component {
           handleMouseEnter={this.handleMouseEnter}
           handleMouseLeave={this.handleMouseLeave}
           handleItemSelect={this.handleItemSelect}
+          grouped={_.isPlainObject(this.props.data)}
         />
       </div>
     );
@@ -77,31 +91,63 @@ Dropdown.propTypes = {
   ]).isRequired
 }
 
-const DropDownContainer = ({ data, onSelect, handleItemSelect, isExpanded, focusedIndex, handleMouseEnter, handleMouseLeave }) => {
+const DropDownContainer = props => {
+  const {
+    grouped,
+    data,
+    isExpanded,
+    handleMouseEnter,
+    handleMouseLeave
+  } = props;
+
   if (!isExpanded) {
     return null;
   }
+
   return (
     <div className="dropdown-container">
       {
-        _.map(data, (item, index) => {
-          const isFocused = focusedIndex===index
-          return (
-            <div
-              key={index}
-              className={isFocused ? "dropdown-item-focused" :"dropdown-item"}
-              onMouseEnter={() => handleMouseEnter(index)}
-              onMouseLeave={handleMouseLeave}
-              // onClick={() => onSelect(item, index)}
-              onClick={handleItemSelect}
-            >
-              <span>
-                {item}
-              </span>
-            </div>
-          )
-        })
-      }     
+        grouped
+          ? _.map(data, (items, group) => {
+              return (
+                <div
+                  key={group}
+                  onMouseEnter={() => handleMouseEnter({ group })}
+                  onMouseLeave={() => handleMouseLeave({ group })}
+                >
+                  <div className="dropdown-group-title">
+                    <span>{group}</span>
+                  </div>
+                  <DropdownItems group={group} items={items} { ...props } />
+                </div>
+              )
+            })
+          : <DropdownItems items={data} { ...props }/>
+      }
     </div>
-  )
+  );
+}
+
+const DropdownItems = ({ group, items, focusedIndex, focusedGroup, handleMouseEnter, handleMouseLeave, handleItemSelect }) => {
+  return (
+    _.map(items, (item, index) => {
+      const isItemFocused = focusedIndex===index
+      const isGroupFocused = focusedGroup===group
+      const isFocused = group ? ( isGroupFocused && isItemFocused) : isItemFocused
+
+      return (
+        <div
+          key={index}
+          className={ isFocused ? "dropdown-item-focused" :"dropdown-item"}
+          onMouseEnter={() => handleMouseEnter({ index })}
+          onMouseLeave={handleMouseLeave}
+          onClick={handleItemSelect}
+        >
+          <span>
+            {item}
+          </span>
+        </div>
+      );
+    })
+  );
 }
